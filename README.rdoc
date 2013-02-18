@@ -10,8 +10,8 @@ arrays, or any object. Ported to Rails 3!
 == Setup
 
 Edit your Gemfile:
-  gem "rails-settings", :git => "git://github.com/100hz/rails-settings.git"
-  
+  gem "rails-settings", :git => "https://github.com/pomelolabs/rails-settings"
+
 Generate your settings:
   rails g settings <settings_name>
 
@@ -62,7 +62,7 @@ Specified value even if they are not in the database.  Make a new file in config
 with the following:
 
   MySettings.defaults[:some_setting] = 'footastic'
-  
+
 Now even if the database is completely empty, you app will have some intelligent defaults:
 
   MySettings.some_setting   # returns 'footastic'
@@ -70,7 +70,7 @@ Now even if the database is completely empty, you app will have some intelligent
 Settings may be bound to any existing ActiveRecord object. Define this association like this:
 
   class User < ActiveRecord::Base
-    has_settings
+    include RailsSettings
   end
 
 Then you can set/get a setting for a given user instance just by doing this:
@@ -80,11 +80,11 @@ Then you can set/get a setting for a given user instance just by doing this:
   user.settings.color # returns :red
   user.settings.all # { "color" => :red }
 
-I you want to find users having or not having some settings, there are named scopes for this:
+If you want to find users having or not having some settings, there are named scopes for this:
 
   User.with_settings # => returns a scope of users having any setting
   User.with_settings_for('color') # => returns a scope of users having a 'color' setting
-  
+
   User.without_settings # returns a scope of users having no setting at all (means user.settings.all == {})
   User.without_settings('color') # returns a scope of users having no 'color' setting (means user.settings.color == nil)
 

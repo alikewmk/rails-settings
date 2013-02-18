@@ -1,5 +1,8 @@
 module RailsSettings
   class Settings < ActiveRecord::Base
+    after_create  :write_cache
+    after_update  :write_cache
+    after_destroy :clear_cache
 
     self.table_name = 'settings'
 
@@ -61,6 +64,8 @@ module RailsSettings
 
     #get a setting value by [] notation
     def self.[](var_name)
+      cached_key = Rails.cache.fetch("settings:#{var_name}")
+      return cached_key if cached_key
       if var = object(var_name)
         var.value
       elsif @@defaults[var_name.to_s]
@@ -97,6 +102,10 @@ module RailsSettings
       thing_scoped.find_by_var(var_name.to_s)
     end
 
+    def self.thing_scoped
+      self.where(:thing_type => nil, :thing_id => nil)
+    end
+
     #get the value field, YAML decoded
     def value
       YAML::load(self[:value])
@@ -107,8 +116,19 @@ module RailsSettings
       self[:value] = new_value.to_yaml
     end
 
-    def self.thing_scoped
-      self.where(:thing_type => nil, :thing_id => nil)
+    def write_cache
+      cache_key = has_thing? ? "settings:#{thing_type}:#{thing_id}:#{self.var}" : "settings:#{self.var}"
+      Rails.cache.write(cache_key, self.value)
     end
+
+    def clear_cache
+      cache_key = has_thing? ? "settings:#{thing_type}:#{thing_id}:#{self.var}" : "settings:#{self.var}"
+      Rails.cache.delete(cache_key)
+    end
+
+    def has_thing?
+      self.thing_type && self.thing_id
+    end
+
   end
 end
