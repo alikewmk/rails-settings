@@ -12,7 +12,8 @@ module RailsSettings
 
     def self.[](var_name)
       Rails.cache.fetch("settings:#{@object.class.name.downcase}:#{@object.id}:#{var_name}") {
-        self.thing_scoped.find_by_var(var_name.to_s)
+        var = object(var_name)
+        var ? var.value : nil
       }
     end
 

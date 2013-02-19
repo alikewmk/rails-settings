@@ -9,6 +9,8 @@ describe RailsSettings do
     @merged_hash = @hash.merge(@other_hash)
     @array       = ['first', 'last']
     @new_array   = ['first', 'middle', 'last']
+    @user = User.create(name: 'rails-settings')
+    @model_prefix = "#{@user.class.name.downcase}:#{@user.id}"
   end
 
   describe "For global settings" do
@@ -96,11 +98,9 @@ describe RailsSettings do
 
   describe "For embedded Model" do
     before do
-      @user = User.create(name: 'rails-settings')
       @user.settings.string = @string
       @user.settings.hashes = @hash
       @user.settings.array  = @array
-      @model_name = @user.class.name.downcase
     end
 
     describe "Get" do
@@ -112,9 +112,9 @@ describe RailsSettings do
         it { @user.settings.array.class.should  == @array.class }
 
         context 'also read the data from cache' do
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:string").should == @string }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:hashes").should == @hash }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:array").should  == @array }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:string").should == @string }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:hashes").should == @hash }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:array").should  == @array }
         end
       end
     end
@@ -126,14 +126,14 @@ describe RailsSettings do
         @user.settings.merge!(:hashes, @other_hash)
       end
       describe "with new data" do
-        it { @user.settings.string.should       == @new_string }
-        it { @user.settings.hashes.should       == @merged_hash }
-        it { @user.settings.array.should        == @new_array }
+        it { @user.settings.string.should == @new_string }
+        it { @user.settings.hashes.should == @merged_hash }
+        it { @user.settings.array.should  == @new_array }
 
         context 'also write the new data to cache at the same time' do
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:string").should == @new_string }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:hashes").should == @merged_hash }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:array").should  == @new_array }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:string").should == @new_string }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:hashes").should == @merged_hash }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:array").should  == @new_array }
         end
       end
     end
@@ -150,9 +150,9 @@ describe RailsSettings do
         it { @user.settings.array.should  == nil }
 
         context 'also with cache at the same time' do
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:string").should == nil }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:hashes").should == nil }
-          it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:array").should  == nil }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:string").should == nil }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:hashes").should == nil }
+          it { Rails.cache.fetch("settings:#{@model_prefix}:array").should  == nil }
         end
       end
     end
@@ -167,8 +167,8 @@ describe RailsSettings do
       it { @user.settings['namespace.lastname'].should  == 'last name' }
 
       context 'read the data from cache' do
-        it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:namespace.firstname").should == 'first name' }
-        it { Rails.cache.fetch("settings:#{@model_name}:#{@user.id}:namespace.lastname").should  == 'last name' }
+        it { Rails.cache.fetch("settings:#{@model_prefix}:namespace.firstname").should == 'first name' }
+        it { Rails.cache.fetch("settings:#{@model_prefix}:namespace.lastname").should  == 'last name' }
       end
 
       context "get the entries by namespace" do

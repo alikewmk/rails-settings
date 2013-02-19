@@ -1,5 +1,6 @@
 module RailsSettings
   class Settings < ActiveRecord::Base
+    attr_accessible :var
     after_create  :write_cache
     after_update  :write_cache
     after_destroy :clear_cache
@@ -127,7 +128,7 @@ module RailsSettings
     end
 
     def has_thing?
-      self.thing_type && self.thing_id
+      thing_type && thing_id
     end
 
   end
