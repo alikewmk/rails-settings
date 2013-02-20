@@ -118,17 +118,15 @@ module RailsSettings
     end
 
     def write_cache
-      cache_key = has_thing? ? "settings:#{thing_type}:#{thing_id}:#{self.var}" : "settings:#{self.var}"
       Rails.cache.write(cache_key, self.value)
     end
 
     def clear_cache
-      cache_key = has_thing? ? "settings:#{thing_type}:#{thing_id}:#{self.var}" : "settings:#{self.var}"
       Rails.cache.delete(cache_key)
     end
 
-    def has_thing?
-      thing_type && thing_id
+    def cache_key
+      thing_type && thing_id ? "settings:#{thing_type.downcase}:#{thing_id}:#{self.var}" : "settings:#{self.var}"
     end
 
   end

@@ -7,7 +7,7 @@ module RailsSettings
     end
 
     def self.thing_scoped
-      Settings.where(:thing_type => @object.class.name.downcase, :thing_id => @object.id)
+      Settings.where(:thing_type => @object.class.name, :thing_id => @object.id)
     end
 
     def self.[](var_name)
